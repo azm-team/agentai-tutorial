@@ -1,0 +1,14 @@
+.DS_Store
+/.quarto/
+**/*.quarto_ipynb
+
+# Python
+__pycache__/
+*.pyc
+
+# my-md-program 出力（再生成可能）
+my-md-program/trajectory.xyz
+my-md-program/energy.log
+
+# Quarto レンダ出力
+src/slide.html

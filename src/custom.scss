@@ -1,0 +1,164 @@
+/*-- scss:defaults --*/
+
+// ---- カラーパレット ----
+$primary: #2c5f7f;        // 落ち着いた青：見出し・リンク
+$accent:  #c97b3c;        // 控えめなオレンジ：強調
+$ink:     #2b2b2b;        // 本文
+$muted:   #6b7280;        // 補助テキスト
+$bg:      #fbfbf9;        // ほんのり温かみのある背景
+$rule:    #e5e7eb;        // 罫線
+
+// ---- 全体設定 ----
+$body-bg:    $bg;
+$body-color: $ink;
+$link-color: $primary;
+$selection-bg: rgba($primary, 0.25);
+
+// ---- 見出し ----
+$presentation-heading-color: $primary;
+$presentation-heading-font-weight: 600;
+$presentation-h1-font-size: 2.0em;
+$presentation-h2-font-size: 1.5em;
+$presentation-h3-font-size: 1.2em;
+
+// ---- フォント ----
+$font-family-sans-serif:
+  "Helvetica Neue",
+  "Hiragino Kaku Gothic ProN",
+  "Hiragino Sans",
+  "Noto Sans JP",
+  "Yu Gothic",
+  "Meiryo",
+  sans-serif;
+
+$font-family-monospace:
+  "JetBrains Mono",
+  "SF Mono",
+  "Menlo",
+  "Consolas",
+  monospace;
+
+$presentation-font-size-root: 28px;
+$presentation-line-height: 1.55;
+
+// ---- コード ----
+$code-color: $accent;
+$code-block-bg: #f3f1ec;
+$code-block-border-color: $rule;
+
+
+/*-- scss:rules --*/
+
+// 全体トーン
+.reveal {
+  letter-spacing: 0.01em;
+
+  .slides section {
+    text-align: left;
+  }
+
+  // セクションタイトル（# 見出し）スライドを少し締まった印象に
+  section.title-slide,
+  section[data-state="title"] {
+    text-align: left;
+  }
+
+  // 見出しの下に細い罫線
+  h2 {
+    border-bottom: 2px solid $rule;
+    padding-bottom: 0.25em;
+    margin-bottom: 0.6em;
+  }
+
+  // インラインコード
+  code:not(.sourceCode) {
+    background: rgba($accent, 0.08);
+    color: $accent;
+    padding: 0.05em 0.3em;
+    border-radius: 4px;
+    font-size: 0.92em;
+  }
+
+  // ブロック引用
+  blockquote {
+    border-left: 4px solid $primary;
+    background: rgba($primary, 0.05);
+    padding: 0.4em 0.9em;
+    margin: 0.5em 0;
+    color: $muted;
+    font-style: normal;
+    border-radius: 0 6px 6px 0;
+  }
+
+  // リスト
+  ul, ol {
+    margin-left: 0.3em;
+    li {
+      margin: 0.15em 0;
+    }
+    li::marker {
+      color: $primary;
+    }
+  }
+
+  // 強調
+  strong {
+    color: darken($primary, 8%);
+    font-weight: 700;
+  }
+
+  // 水平線
+  hr {
+    border: none;
+    border-top: 1px solid $rule;
+    margin: 0.8em 0;
+  }
+}
+
+// ---- Callouts ----
+.reveal .callout {
+  border-radius: 8px;
+  border-width: 1px;
+  margin: 0.6em 0;
+
+  .callout-header {
+    font-weight: 600;
+    padding: 0.35em 0.7em;
+  }
+
+  .callout-body-container,
+  .callout-body {
+    padding: 0.4em 0.8em;
+    font-size: 0.95em;
+  }
+
+  &.callout-note     { border-left: 4px solid $primary; }
+  &.callout-tip      { border-left: 4px solid #2f8f5e; }
+  &.callout-warning  { border-left: 4px solid #d4a73a; }
+  &.callout-important{ border-left: 4px solid #c0504d; }
+}
+
+// タイトルスライド
+#title-slide {
+  text-align: left;
+  .title {
+    color: $primary;
+    font-weight: 700;
+  }
+  .subtitle {
+    color: $muted;
+    font-weight: 400;
+    margin-top: 0.3em;
+  }
+}
+
+// スライド番号・プログレスバー
+.reveal .progress {
+  color: $primary;
+  height: 4px;
+}
+.reveal .slide-number {
+  color: $muted;
+  background: transparent;
+  font-size: 0.7em;
+}

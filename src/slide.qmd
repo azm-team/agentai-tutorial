@@ -1,0 +1,205 @@
+---
+title: "初心者向け Agent AI チュートリアル"
+subtitle: "Claude Code / Gemini CLI / OpenAI Codexの使い方"
+format:
+  revealjs:
+    theme: [default, custom.scss]
+    slide-number: c/t
+    progress: true
+    transition: fade
+    transition-speed: fast
+    incremental: false
+    code-overflow: wrap
+    code-block-height: 650px
+    highlight-style: github
+    width: 1280
+    height: 720
+    margin: 0.08
+    embed-resources: true
+    history: false
+lang: ja
+execute:
+  echo: true
+editor:
+  render-on-save: true
+---
+
+# はじめに
+
+## AIは間違える
+
+このチュートリアルではチャットメインで使うものをChat AI，コンピュータ操作メインで使うものをAgent AIと呼ぶ．
+内部のモデルは同じ．
+
+- **Chat AI** は，誤情報やバイアスの掛かった情報を生成するに留まることが多い．
+- **Agent AI** は，誤りを含む成果物の生成や意図しないファイル消去など，**大きな被害を与えがち**．
+
+**AIがどんなコマンドを実行しようとしているか，常にチェックする**ようにしよう．
+
+# 基本的な使い方 & ユースケース
+
+## Web検索 & ファイル作成
+
+::: {.callout-note title="プロンプト例（製品調査）"}
+Claude Code，Gemini CLI，OpenAI Codex それぞれの価格と機能について調べ，
+Markdown形式でファイルに書き出して
+:::
+
+Web検索は Chat AI でもできるが，
+**結果をファイルに直接書き出せる**のが Agent AI の少し便利なところ．
+
+::: {.callout-note title="プロンプト例（手法調査）"}
+長距離クーロン力計算の各手法（u-seriesやMSMなど新しいものを含む）それぞれの理論的背景や利点について調べ，
+出典付きでMarkdown形式でファイルに書き出して
+:::
+
+ユーザからは**AIが何を読んだかわからないことに注意**．
+論文は要旨しか読んでいないかもしれない．
+どのようなモデルが読んでいるかもわからない（Claude Codeでは，各サイトの読み込みと要約を低性能モデル（Haiku）に行わせ，高性能モデル（Opus）が結果を統合してユーザに報告することもある）．
+
+## ライブラリ / アプリの導入
+
+::: {.callout-note title="プロンプト例（Pythonライブラリ）"}
+- PythonライブラリASEについて調べ，何ができるライブラリかMarkdownファイルにまとめて
+- ASEをインストールし，適当なサンプルプログラムを作成し，実行して
+:::
+
+::: {.callout-note title="プロンプト例（アプリケーション）"}
+- MDシミュレーションコードのLAMMPSをソースからコンパイルして
+- LAMMPSの適当なインプットファイルを作成してテスト実行して
+:::
+
+Web検索 → インストール → テストファイル作成＆実行 まで全てできる．
+あいまいな部分（LAMMPSのインストール先など）は質問してきたり，してこなかったり．
+
+## ローカルファイルの理解
+
+::: {.callout-note title="プロンプト例（コードベースの理解）"}
+- `@./my-md-program` を見て，内容を説明して
+- `@./assets/paper.pdf` と `@./assets/photo_lj.png` を見て，`@./my-md-program`との関連性を説明して
+:::
+
+複数ファイルでも，PDFでも，画像でも読み込める．ただし，複数ファイルの場合，AIが読むべきファイルを考えて必要なファイルだけ読むことも多い．
+
+::: {.callout-note title="プロンプト例（編集）"}
+`@./my-md-program` を，原子単位系ではなくSI単位系で計算するように書き換えて
+:::
+
+**複数ファイルにまたがる編集** もOK．
+
+::: {.callout-note}
+@ 記法`@.<path>`で，ファイルをAIに明示的に読ませることができる
+:::
+
+
+## Slashコマンド
+
+Agent AI は，自然言語での指示のほかに，
+**slashコマンド** で特定の動作やツール使用を明示的に指示できる．
+
+例：
+
+- `/model` … モデル選択
+  （Gemini なら `gemini-3-flash-preview` や `gemma-4-31b-it` など）
+- `/clear` … context をリセット
+- `/plan` … 実行前に計画を立てさせる
+
+# 使い方のコツ
+
+## Contextとは
+
+**context** とは，易しく言えばAIが覚えている情報のこと
+（会話履歴や読み込んだファイルの内容）．
+
+LLMの回答は context の内容に強く影響を受ける：
+
+- context に出てきた**ツールや手法を使いたがる**
+  （ASE の話が context にあると ASE を使いたがるなど）
+- context に出現した**言語や文体に寄った出力**になる
+  （英語の論文を読ませた後，英語で話し始めるなど）
+- context 内の**誤りを信じ続ける**（単位換算の誤りなど）
+
+一方，contextは有限なので，AIはすべてを記憶することはできない．
+
+## context管理のコツ：目的は明確に．定期的に`/clear` しよう
+
+context が長くなると不都合が生じやすい．
+
+::: {.callout-tip title="推奨パターン"}
+「Aを行う」という明確な目的を立て，context が空の状態でその目的に取り組む．
+終わったらcontextを `/clear`．
+:::
+
+::: {.callout-warning title="最悪のパターン"}
+contextを `/clear`しないまま，関連性の薄い複数の目的に関する作業を進め，途中で脈絡のない質問もする．
+:::
+
+一方，「Aを行う」という目的が一貫していれば，
+context が長くなっても問題ないことも多い．
+
+::: {.callout-tip title="Tips"}
+一通りの作業を終えた後，`/clear` した状態のAIに作業を review させると，
+ミスが見つかることがある．
+:::
+
+## `/plan` を立てよう
+
+「Aを行う」という目的に対して，往々にしてその達成手段は複数ある．
+
+> 例：MDをするにしても，既存アプリを使うのか，
+> ライブラリを使ってコードを書くのか，
+> ライブラリを使わずコードを書くのか …
+
+`/plan` では，具体的な実行の前にAIに計画を作らせ，
+**ユーザが許可（または計画の修正指示）してから実行に移す**ことができる．
+
+適切な手段は，大目的やこれまでの経緯を知っているユーザにしかわからない．
+**少しでも手段に任意性のある作業なら `/plan` から始める** のがおすすめ．
+
+::: {.callout-note title="プロンプト例"}
+- /plan
+- Lennerd-Jonesポテンシャルを使ってAr原子のMDシミュレーションを行うプログラムを作成して
+:::
+→ 言語は何を使うか，ライブラリは使うか，実行速度重視か可読性重視かなど，方針を練る
+
+## `GEMINI.md` を活用しよう
+
+`gemini` を起動するディレクトリに `GEMINI.md` を置いておくと，
+Gemini はその内容を context に入れた状態で会話を始める．
+Agent AIにルールを教える最も基本的な方法．
+
+（ファイル名はアプリによるが，どのAgentでも同じことができる．Claude Code の場合は `CLAUDE.md` ．）
+
+::: {.callout-note title="ヒント"}
+このプロジェクトに `GEMINI.md` を置いてあるので，中身を見てみよう．
+:::
+::: {.callout-note title="`GEMINI.md`が充実しはじめたら"}
+`GEMINI.md`の内容は毎回contextに乗るので，短く保つのが良い．特定の状況でだけ参照するルールは別ファイルに書くべき．
+
+例えば，`GEMINI.md`に"図を作成するときは./plot_rule.mdを参照"と書き，`plot_rule.md`に図を作るときのルール（サイズや色使いなど）を書く．
+:::
+
+## データの扱いの注意
+
+::: {.callout-warning title="機密情報を送らない"}
+Chat AI でも同じだが，
+**AIへの入力内容（読み込んだファイル含む）は Google などの社員が見る可能性がある**．
+SSH秘密鍵やAPIキーなどは送らないこと．
+:::
+
+::: {.callout-warning title="学習データ利用の設定"}
+入出力内容がAIの学習に使われることを許可するかどうかの設定があるので，
+**必ず確認すること**．
+:::
+
+## 応用
+
+さらに学ぶならこのあたり：
+
+- **Skills** — 特定タスク向けの手順書・参考資料をパッケージ化してAIに読み込ませる仕組み
+- **Sub Agent** — 別のエージェントに作業を委譲（context分離・並列処理）
+- **MCP server** — 外部ツールやデータソース（Slackや論文検索APIなど）をAIに接続するプロトコル
+- **Custom Slash Commands** — よく使うプロンプトを `/mycmd` 化
+- **Permissions / `settings.json`** — 危険なコマンド実行の事前許可・拒否設定
+- **Docker** との連携 — コンテナ内でAgentを動かし，被害範囲をホストから隔離
+- **Git** との連携 — バージョン管理と組み合わせて差分確認・履歴管理・ロールバック
